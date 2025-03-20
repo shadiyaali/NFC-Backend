@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from datetime import timedelta, date
 
 
+
 class Admin(AbstractUser):
     username = None  
     email = models.EmailField(unique=True)  
@@ -63,12 +64,7 @@ class Vendor(models.Model):
     
 
 
-class Templates(models.Model):
-    name = models.CharField(max_length=255, null=True, blank=True)
-    file = models.FileField(upload_to='templates/', null=True, blank=True)  
 
-    def __str__(self):
-        return self.name or "Unnamed Template"
 
 
 class Subscription(models.Model):
@@ -88,7 +84,8 @@ class Users(models.Model):
         ('Pending', 'Pending'),
         ('Accepted', 'Accepted'),
         ('Rejected', 'Rejected'),
-    ]    
+    ]
+    
     username = models.CharField(max_length=255, unique=True, null=True, blank=True)
     name = models.CharField(max_length=255, null=True, blank=True)
     company_name = models.CharField(max_length=255, null=True, blank=True)
@@ -98,26 +95,29 @@ class Users(models.Model):
     contact_number = models.CharField(max_length=50, null=True, blank=True)
     mobile_number = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(unique=True, null=True, blank=True)
+    profile_image = models.ImageField(upload_to='profile_logos/', null=True, blank=True)
     website = models.TextField(null=True, blank=True)
     logo = models.ImageField(upload_to='user_logos/', null=True, blank=True)
-    facebook = models.TextField(null=True, blank=True)
-    instagram = models.TextField(null=True, blank=True)
-    youtube = models.TextField(null=True, blank=True)
-    password = models.CharField(max_length=255, null=True, blank=True) 
-    location_map = models.TextField(null=True, blank=True) 
-    template = models.ForeignKey(Templates, on_delete=models.SET_NULL, null=True, blank=True)
+    password = models.CharField(max_length=255, null=True, blank=True)
+    location_map = models.TextField(null=True, blank=True)  
     vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, null=True, blank=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='Active', blank=True, null=True)
     approval_status = models.CharField(max_length=255, choices=APPROVAL_CHOICES, default='Pending', blank=True, null=True)
-  
+    
     def save(self, *args, **kwargs):
         if self.password:
-            self.password = make_password(self.password)  
-       
+            self.password = make_password(self.password)
         super().save(*args, **kwargs)
-
+    
     def __str__(self):
         return self.name or str(self.username)
+
+class SocialMediaLink(models.Model):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='social_media_links')
+    url = models.URLField(max_length=500)
+    
+    def __str__(self):
+        return f"{self.user} - {self.url}"
 
 
 
